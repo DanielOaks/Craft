@@ -1,4 +1,5 @@
 #include "item.h"
+#include "db.h"
 #include "util.h"
 
 #include <stdlib.h>
@@ -86,6 +87,8 @@ int add_new_item(const char *name, int tile[7], bool is_plant, bool is_obstacle,
     new_item->is_obstacle = is_obstacle;
     new_item->is_transparent = is_transparent;
     new_item->is_destructable = is_destructable;
+
+    db_insert_item(new_item->id, new_item->name);
 
     // add item to our internal list
     if (items == NULL) {

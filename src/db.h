@@ -21,7 +21,9 @@ int db_auth_get_selected(
     char *identity_token, int identity_token_length);
 void db_save_state(float x, float y, float z, float rx, float ry);
 int db_load_state(float *x, float *y, float *z, float *rx, float *ry);
+void db_load_items();
 void db_insert_block(int p, int q, int x, int y, int z, int w);
+void db_insert_item(int id, const char *name);
 void db_insert_light(int p, int q, int x, int y, int z, int w);
 void db_insert_sign(
     int p, int q, int x, int y, int z, int face, const char *text);
