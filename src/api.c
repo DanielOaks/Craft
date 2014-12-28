@@ -79,7 +79,7 @@ int clua_init()
     sprintf(sPath, "%s\\*.lua", MODULE_DIR);
 
     if((hFind = FindFirstFile(sPath, &fdFile)) == INVALID_HANDLE_VALUE) {
-        fprintf(stderr, "[Lua] Module folder not found: [%s]\n", sDir);
+        fprintf(stderr, "[Lua] Module folder not found: [%s]\n", MODULE_DIR);
         return 1;
     }
 
@@ -87,7 +87,7 @@ int clua_init()
         if(strcmp(fdFile.cFileName, ".") != 0
            && strcmp(fdFile.cFileName, "..") != 0)
         {
-            sprintf(sPath, "%s\\%s", sDir, fdFile.cFileName);
+            sprintf(sPath, "%s\\%s", MODULE_DIR, fdFile.cFileName);
 
             mod_n = malloc(sizeof(struct module_name_list));
             mod_n->filename = sPath;
