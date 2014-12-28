@@ -20,6 +20,14 @@ add_executable(
 
 add_definitions(-std=c99 -O3)
 
+set(BUILD_CURL_EXE OFF)
+set(BUILD_CURL_TESTS OFF)
+set(HTTP_ONLY ON)
+set(CMAKE_USE_LIBSSH2 OFF)
+set(CURL_STATICLIB ON)
+add_subdirectory(deps/curl)
+include_directories(deps/curl/include)
+
 add_subdirectory(deps/glfw)
 include_directories(deps/glew/include)
 include_directories(deps/glfw/include)
@@ -30,15 +38,8 @@ include_directories(deps/sglib)
 include_directories(deps/sqlite)
 include_directories(deps/tinycthread)
 
-if(MINGW)
-    set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH}
-        "C:/Program Files/CURL/lib" "C:/Program Files (x86)/CURL/lib")
-    set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH}
-        "C:/Program Files/CURL/include" "C:/Program Files (x86)/CURL/include")
-endif()
-
-find_package(CURL REQUIRED)
-include_directories(${CURL_INCLUDE_DIR})
+set(CURL_INCLUDE_DIR deps/curl/include)
+set(CURL_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/deps/curl/lib/libcurl${CMAKE_SHARED_LIBRARY_SUFFIX})
 
 if(APPLE)
     target_link_libraries(craft glfw
