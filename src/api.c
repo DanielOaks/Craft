@@ -87,10 +87,17 @@ int clua_init()
         if(strcmp(fdFile.cFileName, ".") != 0
            && strcmp(fdFile.cFileName, "..") != 0)
         {
-            sprintf(sPath, "%s\\%s", MODULE_DIR, fdFile.cFileName);
+            char *module_filename = calloc(MAX_FILENAME_LENGTH, sizeof(char));
+
+            if (MAX_FILENAME_LENGTH <= (strlen(MODULE_DIR) + strlen(fdFile.cFileName) + 1)) {
+                fprintf(stderr, "[Lua] Module name is too large: %s\n", fdFile.cFileName);
+                continue;
+            }
+
+            snprintf(module_filename, MAX_FILENAME_LENGTH - 1, "%s\\%s", MODULE_DIR, fdFile.cFileName);
 
             mod_n = malloc(sizeof(struct module_name_list));
-            mod_n->filename = sPath;
+            mod_n->filename = module_filename;
             mod_n->next_ptr = NULL;
 
             SGLIB_LIST_ADD(struct module_name_list, mod_names, mod_n, next_ptr);
@@ -113,7 +120,7 @@ int clua_init()
             if ((name_len > ext_len) && (0 == strncmp(dir->d_name + (name_len - ext_len), ext, ext_len))) {
                 char *module_filename = calloc(MAX_FILENAME_LENGTH, sizeof(char));
 
-                if (MAX_FILENAME_LENGTH <= (strlen(MODULE_DIR) + strlen(dir->d_name))) {
+                if (MAX_FILENAME_LENGTH <= (strlen(MODULE_DIR) + strlen(dir->d_name) + 1)) {
                     fprintf(stderr, "[Lua] Module name is too large: %s\n", dir->d_name);
                     continue;
                 }
