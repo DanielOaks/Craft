@@ -146,7 +146,7 @@ int db_init(char *path) {
         db, insert_block_query, -1, &insert_block_stmt, NULL);
     if (rc) return rc;
     rc = sqlite3_prepare_v2(
-        db, insert_block_query, -1, &insert_item_stmt, NULL);
+        db, insert_item_query, -1, &insert_item_stmt, NULL);
     if (rc) return rc;
     rc = sqlite3_prepare_v2(
         db, insert_light_query, -1, &insert_light_stmt, NULL);
@@ -358,7 +358,6 @@ void db_insert_item(int id, const char *name) {
     if (!db_enabled) {
         return;
     }
-    printf("Inserting item: %d %s\n", id, name);
     sqlite3_reset(insert_item_stmt);
     sqlite3_bind_int(insert_item_stmt, 1, id);
     sqlite3_bind_text(insert_item_stmt, 2, name, -1, NULL);
