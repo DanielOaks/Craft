@@ -106,13 +106,13 @@ void getPIP(float *point, float *point_on_plane, float *ray_origin, float *ray_v
 
 void update_clouds(float player_x, float player_y, float player_z, float rx, float rz, float fov) {
     int i;
-    rx -= M_PI/2;
+    rx -= PI/2;
 
     float rdx = player_x + (-40 * cos(rx));
     float rdz = player_z + (-40 * sin(rx));
 
-    float llx = rx - (fov*(M_PI/180))/1.6;
-    float lrx = rx + (fov*(M_PI/180))/1.6;
+    float llx = rx - (fov*(PI/180))/1.6;
+    float lrx = rx + (fov*(PI/180))/1.6;
 
     float ldx = player_x + (200 * cos(llx));
     float ldz = player_z + (200 * sin(llx));
