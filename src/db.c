@@ -576,7 +576,7 @@ void db_load_items() {
     while (sqlite3_step(load_items_stmt) == SQLITE_ROW) {
         struct db_item_list *new_db_item = malloc(sizeof(struct db_item_list));
         new_db_item->id = sqlite3_column_int(load_items_stmt, 0);
-        new_db_item->name = sqlite3_column_text(load_items_stmt, 1);
+        new_db_item->name = (const char *)sqlite3_column_text(load_items_stmt, 1);
         SGLIB_LIST_ADD(struct db_item_list, db_items, new_db_item, next_ptr);
     }
     mtx_unlock(&load_mtx);
