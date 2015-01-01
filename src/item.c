@@ -16,7 +16,7 @@ void _recalc_last_item_id() {
 
     struct item_list *it = NULL;
     SGLIB_LIST_MAP_ON_ELEMENTS(struct item_list, items, it, next_ptr, {
-        if (it->id > last_item_id) {
+        if (last_item_id < it->id) {
             last_item_id = it->id;
         }
     });
@@ -55,7 +55,7 @@ struct item_list *get_item_by_id(unsigned int id) {
 // we still do linked-list traversal for accessing by name, but we assume modules cache
 //   the ids of their required items anyways. if required, do this name-based lookup by
 //   a hash-map in the future
-struct item_list *get_item_by_name(char *name) {
+struct item_list *get_item_by_name(const char *name) {
     SGLIB_LIST_MAP_ON_ELEMENTS(struct item_list, items, item, next_ptr, {
         if (strncmp(item->name, name, sizeof(item->name) / sizeof(char)) == 0) {
             return item;
@@ -67,6 +67,11 @@ struct item_list *get_item_by_name(char *name) {
 // adds a new item and returns allocated item id
 // also recalcs caches as required above
 int add_new_item(const char *name, int tile[7], bool is_plant, bool is_obstacle, bool is_transparent, bool is_destructable) {
+    // check if already exists
+    if (get_item_by_name(name) != NULL) {
+        return get_item_by_name(name)->id;
+    }
+
     // create tiles
     struct tile_ids *tiles = malloc(sizeof(struct tile_ids));
     tiles->top = tile[0];
