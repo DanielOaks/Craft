@@ -52,7 +52,6 @@ void _recalc_last_db_item_id() {
             last_db_item_id = it->id;
         }
     });
-    printf("Last item ID = %d\n", last_db_item_id);
 }
 
 // we do lots and lots of lookups for ids, when loading or saving from the database
@@ -442,8 +441,6 @@ bool db_item_exists(const char *name) {
         exists = sqlite3_column_int(check_item_exists_stmt, 0);
     }
     mtx_unlock(&load_mtx);
-
-    printf("%s exists: %d\n", name, exists);
 
     return exists;
 }
