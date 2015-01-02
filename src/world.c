@@ -7,27 +7,29 @@ void create_world(int p, int q, world_func func, void *arg) {
     int pad = 1;
 
     // block ids
-    unsigned int grass_block_id = get_item_by_name("grass")->id;
-    unsigned int sand_block_id = get_item_by_name("sand")->id;
-    unsigned int cobble_block_id = get_item_by_name("cobble")->id;
-    unsigned int sandstone_block_id = cobble_block_id; // til we create a real sandstone block
-    unsigned int first_flower_block_id = get_item_by_name("yellow flower")->id;
+    itemid grass_block_id = get_item_by_name("grass")->id;
+    itemid sand_block_id = get_item_by_name("sand")->id;
+    itemid cobble_block_id = get_item_by_name("cobble")->id;
+    itemid sandstone_block_id = cobble_block_id; // til we create a real sandstone block
+    itemid first_flower_block_id = get_item_by_name("yellow flower")->id;
+    itemid tall_grass_id = get_item_by_name("tall grass")->id;
 
     // chunk creation loop
     for (int dx = -pad; dx < CHUNK_SIZE + pad; dx++) {
         for (int dz = -pad; dz < CHUNK_SIZE + pad; dz++) {
             int flag = 1;
-            if (dx < 0 || dz < 0 || dx >= CHUNK_SIZE || dz >= CHUNK_SIZE) {
-                flag = -1;
-            }
+            // TODO: find out what this meant to be for, check shaders maybe?
+            // if (dx < 0 || dz < 0 || dx >= CHUNK_SIZE || dz >= CHUNK_SIZE) {
+            //     flag = -1;
+            // }
             int x = p * CHUNK_SIZE + dx;
             int z = q * CHUNK_SIZE + dz;
             float f = simplex2(x * 0.01, z * 0.01, 4, 0.2, 2);
             float g = simplex2(-x * 0.01, -z * 0.01, 2, 0.3, 2);
             int mh = g * 32 + 16;
             int h = f * mh;
-            int w = grass_block_id;
-            unsigned int underblock_id = cobble_block_id;
+            itemid w = grass_block_id;
+            itemid underblock_id = cobble_block_id;
             int underblock_level = 3;
             int t = 4;
             if (h <= t) {
@@ -48,13 +50,14 @@ void create_world(int p, int q, world_func func, void *arg) {
 
             if (w == grass_block_id) {
                 if (SHOW_PLANTS) {
-                    // grass
+                    // tall grass
                     if (simplex2(-x * 0.1, z * 0.1, 4, 0.8, 2) > 0.6) {
-                        func(x, h, z, 17 * flag, arg);
+                        w = tall_grass_id;
+                        func(x, h, z, w * flag, arg);
                     }
                     // flowers
                     if (simplex2(x * 0.05, -z * 0.05, 4, 0.8, 2) > 0.7) {
-                        int w = first_flower_block_id + simplex2(x * 0.1, z * 0.1, 4, 0.8, 2) * 7;
+                        w = first_flower_block_id + simplex2(x * 0.1, z * 0.1, 4, 0.8, 2) * 7;
                         func(x, h, z, w * flag, arg);
                     }
                 }
