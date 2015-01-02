@@ -68,9 +68,9 @@ void _recalc_db_item_caches() {
     itemid db_id = 0;
     itemid item_id = 0;
 
-    SGLIB_LIST_MAP_ON_ELEMENTS(struct db_item_list, db_items, item, next_ptr, {
-        db_id = item->id;
-        item = get_item_by_name(item->name);
+    SGLIB_LIST_MAP_ON_ELEMENTS(struct db_item_list, db_items, it, next_ptr, {
+        db_id = it->id;
+        item = get_item_by_name(it->name);
         if (item == NULL) {
             item_id = 0;
         } else {

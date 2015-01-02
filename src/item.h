@@ -35,6 +35,7 @@ struct item_list {
 };
 
 // functions
+void _recalc_item_id_lookup_cache();
 void setup_base_items();
 
 itemid add_new_item(const char *name, int tile[7], bool is_plant, bool is_obstacle, bool is_transparent, bool is_destructable); // returns allocated item id

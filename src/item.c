@@ -34,7 +34,7 @@ void _recalc_item_id_lookup_cache() {
 
 struct item_list *get_item_by_id(itemid id) {
     // cache is only valid for ids >= last_item_id, so we check that here
-    if (id <= last_item_id) {
+    if (id < last_item_id) {
         return _item_id_lookup_cache[id];
     }
     return NULL;

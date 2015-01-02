@@ -2327,7 +2327,7 @@ void on_scroll(GLFWwindow *window, double xdelta, double ydelta) {
     ypos += ydelta;
     if (ypos < -SCROLL_THRESHOLD) {
         g->item_index++;
-        if (g->item_index > last_item_id) {
+        if (g->item_index >= last_item_id) {
             g->item_index = 0;
         }
         ypos = 0;

@@ -39,6 +39,7 @@ int api_add_block_type(lua_State *l)
     bool is_destructable = lua_toboolean(l, 6);
 
     int block_id = add_new_item(block_name, tiles, is_plant, is_obstacle, is_transparent, is_destructable);
+    _recalc_item_id_lookup_cache();
     _recalc_db_item_caches();
     lua_pushnumber(l, block_id);
     return 1;
