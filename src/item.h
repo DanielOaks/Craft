@@ -4,6 +4,9 @@
 #include <stdbool.h>
 #include <sglib.h>
 
+#define MAX_ITEM_NAME_LENGTH (1024)
+typedef unsigned int itemid;
+
 // structs
 struct tile_ids {
     // these are for usual blocks such as grass, sand, etc
@@ -20,7 +23,7 @@ struct tile_ids {
 
 struct item_list {
     const char *name;
-    int id;
+    itemid id;
     struct tile_ids *tile;
 
     bool is_plant;
@@ -34,17 +37,17 @@ struct item_list {
 // functions
 void setup_base_items();
 
-int add_new_item(const char *name, int tile[7], bool is_plant, bool is_obstacle, bool is_transparent, bool is_destructable); // returns allocated item id
-struct item_list *get_item_by_id(unsigned int id);
+itemid add_new_item(const char *name, int tile[7], bool is_plant, bool is_obstacle, bool is_transparent, bool is_destructable); // returns allocated item id
+struct item_list *get_item_by_id(itemid id);
 struct item_list *get_item_by_name(const char *name);
 
-bool is_plant(int item_id);
-bool is_obstacle(int item_id);
-bool is_transparent(int item_id);
-bool is_destructable(int item_id);
+bool is_plant(itemid item_id);
+bool is_obstacle(itemid item_id);
+bool is_transparent(itemid item_id);
+bool is_destructable(itemid item_id);
 
 // global data
 struct item_list *items;
-int last_item_id;
+itemid last_item_id;
 
 #endif

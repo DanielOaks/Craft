@@ -1,4 +1,5 @@
 #include "api.h"
+#include "db.h"
 #include "item.h"
 #include <string.h>
 #include <stdlib.h>
@@ -38,6 +39,7 @@ int api_add_block_type(lua_State *l)
     bool is_destructable = lua_toboolean(l, 6);
 
     int block_id = add_new_item(block_name, tiles, is_plant, is_obstacle, is_transparent, is_destructable);
+    _recalc_db_item_caches();
     lua_pushnumber(l, block_id);
     return 1;
 }
@@ -191,8 +193,6 @@ int clua_init()
 int clua_close()
 {
     // close lua on every loaded module
-    struct loaded_module_list *mod; // temp
-
     SGLIB_LIST_MAP_ON_ELEMENTS(struct loaded_module_list, loaded_mods, mod, next_ptr, {
         lua_getglobal(mod->L, "shutdown");
 

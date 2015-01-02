@@ -612,7 +612,7 @@ int highest_block(float x, float z) {
     return result;
 }
 
-int _hit_test(
+unsigned int _hit_test(
     Map *map, float max_distance, int previous,
     float x, float y, float z,
     float vx, float vy, float vz,
@@ -644,7 +644,7 @@ int _hit_test(
     return 0;
 }
 
-int hit_test(
+unsigned int hit_test(
     int previous, float x, float y, float z, float rx, float ry,
     int *bx, int *by, int *bz)
 {
@@ -1180,7 +1180,7 @@ void gen_chunk_buffer(Chunk *chunk) {
     chunk->dirty = 0;
 }
 
-void map_set_func(int x, int y, int z, int w, void *arg) {
+void map_set_func(int x, int y, int z, itemid w, void *arg) {
     Map *map = (Map *)arg;
     map_set(map, x, y, z, w);
 }

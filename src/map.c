@@ -42,7 +42,7 @@ void map_copy(Map *dst, Map *src) {
     memcpy(dst->data, src->data, (dst->mask + 1) * sizeof(MapEntry));
 }
 
-int map_set(Map *map, int x, int y, int z, int w) {
+int map_set(Map *map, int x, int y, int z, itemid w) {
     unsigned int index = hash(x, y, z) & map->mask;
     x -= map->dx;
     y -= map->dy;
@@ -77,7 +77,7 @@ int map_set(Map *map, int x, int y, int z, int w) {
     return 0;
 }
 
-int map_get(Map *map, int x, int y, int z) {
+itemid map_get(Map *map, int x, int y, int z) {
     unsigned int index = hash(x, y, z) & map->mask;
     x -= map->dx;
     y -= map->dy;

@@ -1,9 +1,11 @@
 #ifndef _db_h_
 #define _db_h_
 
+#include "item.h"
 #include "map.h"
 #include "sign.h"
 
+void _recalc_db_item_caches();
 void db_enable();
 void db_disable();
 int get_db_enabled();
@@ -22,8 +24,8 @@ int db_auth_get_selected(
 void db_save_state(float x, float y, float z, float rx, float ry);
 int db_load_state(float *x, float *y, float *z, float *rx, float *ry);
 void db_load_items();
-void db_insert_block(int p, int q, int x, int y, int z, int w);
-void db_insert_item(int id, const char *name);
+void db_insert_block(int p, int q, int x, int y, int z, itemid w);
+void db_insert_item(itemid id, const char *name);
 void db_insert_light(int p, int q, int x, int y, int z, int w);
 void db_insert_sign(
     int p, int q, int x, int y, int z, int face, const char *text);

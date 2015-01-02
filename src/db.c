@@ -32,7 +32,7 @@ static mtx_t load_mtx;
 
 struct db_item_list {
     const char *name;
-    int id;
+    itemid id;
 
     struct db_item_list *next_ptr;
 };
@@ -41,24 +41,13 @@ static struct db_item_list *db_items;
 
 // holds the highest item id we have in our db
 // this gets recalced every time we add or subtract items
-int last_db_item_id;
-
-void _recalc_last_db_item_id() {
-    last_db_item_id = 0;
-
-    struct db_item_list *it = NULL;
-    SGLIB_LIST_MAP_ON_ELEMENTS(struct db_item_list, db_items, it, next_ptr, {
-        if (last_db_item_id < it->id) {
-            last_db_item_id = it->id;
-        }
-    });
-}
+itemid last_db_item_id = 0;
 
 // we do lots and lots of lookups for ids, when loading or saving from the database
 // doing this by db access is slow, so use an index-based cache similar to how the
 //   item ids are cached to access things much faster
-int *_db_to_id = NULL;
-int *_id_to_db = NULL;
+itemid *_db_to_id = NULL;
+itemid *_id_to_db = NULL;
 
 // recalculate the id-based lookup caches
 void _recalc_db_item_caches() {
@@ -71,17 +60,17 @@ void _recalc_db_item_caches() {
     }
 
     // create new space
-    _db_to_id = (int *)calloc(sizeof(int), last_db_item_id + 1);
-    _id_to_db = (int *)calloc(sizeof(int), last_item_id + 1);
+    _db_to_id = (itemid *)calloc(sizeof(itemid), last_db_item_id + 1);
+    _id_to_db = (itemid *)calloc(sizeof(itemid), last_item_id + 1);
 
     // and fill in the id mappings
-    struct db_item_list *it = NULL;
     struct item_list *item = NULL;
-    int db_id = 0;
-    int item_id = 0;
-    SGLIB_LIST_MAP_ON_ELEMENTS(struct db_item_list, db_items, it, next_ptr, {
-        db_id = it->id;
-        item = get_item_by_name(it->name);
+    itemid db_id = 0;
+    itemid item_id = 0;
+
+    SGLIB_LIST_MAP_ON_ELEMENTS(struct db_item_list, db_items, item, next_ptr, {
+        db_id = item->id;
+        item = get_item_by_name(item->name);
         if (item == NULL) {
             item_id = 0;
         } else {
@@ -92,7 +81,7 @@ void _recalc_db_item_caches() {
     });
 }
 
-int item_db_to_id(unsigned int id) {
+itemid item_db_to_id(itemid id) {
     // cache is only valid for ids <= last_item_id, so we check that here
     if (id <= last_db_item_id) {
         return _db_to_id[id];
@@ -100,7 +89,7 @@ int item_db_to_id(unsigned int id) {
     return 0;
 }
 
-int item_id_to_db(unsigned int id) {
+itemid item_id_to_db(itemid id) {
     // cache is only valid for ids <= last_item_id, so we check that here
     if (id <= last_item_id) {
         return _id_to_db[id];
@@ -421,11 +410,12 @@ int db_load_state(float *x, float *y, float *z, float *rx, float *ry) {
     return result;
 }
 
-void db_insert_block(int p, int q, int x, int y, int z, int w) {
+void db_insert_block(int p, int q, int x, int y, int z, itemid w) {
     if (!db_enabled) {
         return;
     }
     mtx_lock(&mtx);
+    w = item_id_to_db(w);
     ring_put_block(&ring, p, q, x, y, z, w);
     cnd_signal(&cnd);
     mtx_unlock(&mtx);
@@ -445,12 +435,13 @@ bool db_item_exists(const char *name) {
     return exists;
 }
 
-void db_insert_item(int id, const char *name) {
+void db_insert_item(itemid id, const char *name) {
     if (!db_enabled) {
         return;
     }
     if (!db_item_exists(name)) {
-        int new_db_item_id = last_db_item_id + 1;
+        itemid new_db_item_id = last_db_item_id;
+        last_db_item_id = last_db_item_id + 1;
 
         // add to our db
         sqlite3_reset(insert_item_stmt);
@@ -463,19 +454,18 @@ void db_insert_item(int id, const char *name) {
         new_db_item->id = new_db_item_id;
         new_db_item->name = name;
         SGLIB_LIST_ADD(struct db_item_list, db_items, new_db_item, next_ptr);
-
-        _recalc_last_db_item_id();
+        _recalc_db_item_caches();
     }
-    _recalc_db_item_caches();
 }
 
-void _db_insert_block(int p, int q, int x, int y, int z, int w) {
+void _db_insert_block(int p, int q, int x, int y, int z, itemid w) {
     sqlite3_reset(insert_block_stmt);
     sqlite3_bind_int(insert_block_stmt, 1, p);
     sqlite3_bind_int(insert_block_stmt, 2, q);
     sqlite3_bind_int(insert_block_stmt, 3, x);
     sqlite3_bind_int(insert_block_stmt, 4, y);
     sqlite3_bind_int(insert_block_stmt, 5, z);
+    w = item_id_to_db(w);
     sqlite3_bind_int(insert_block_stmt, 6, w);
     sqlite3_step(insert_block_stmt);
 }
@@ -560,7 +550,8 @@ void db_load_blocks(Map *map, int p, int q) {
         int x = sqlite3_column_int(load_blocks_stmt, 0);
         int y = sqlite3_column_int(load_blocks_stmt, 1);
         int z = sqlite3_column_int(load_blocks_stmt, 2);
-        int w = sqlite3_column_int(load_blocks_stmt, 3);
+        itemid w = sqlite3_column_int(load_blocks_stmt, 3);
+        w = item_db_to_id(w);
         map_set(map, x, y, z, w);
     }
     mtx_unlock(&load_mtx);
@@ -576,11 +567,24 @@ void db_load_items() {
     while (sqlite3_step(load_items_stmt) == SQLITE_ROW) {
         struct db_item_list *new_db_item = malloc(sizeof(struct db_item_list));
         new_db_item->id = sqlite3_column_int(load_items_stmt, 0);
-        new_db_item->name = (const char *)sqlite3_column_text(load_items_stmt, 1);
+        const char *name_from_sqlite = (const char *)sqlite3_column_text(load_items_stmt, 1);
+
+        // copy name, since given pointer expires when other sqlite fn's are called
+        unsigned int new_item_name_length = MAX_ITEM_NAME_LENGTH;
+        if (strlen(name_from_sqlite) < new_item_name_length) {
+            new_item_name_length = strlen(name_from_sqlite) + 1;
+        }
+        char *new_item_name = calloc(new_item_name_length, sizeof(char));
+        strncpy(new_item_name, name_from_sqlite, new_item_name_length);
+        new_db_item->name = new_item_name;
+
         SGLIB_LIST_ADD(struct db_item_list, db_items, new_db_item, next_ptr);
+
+        if (new_db_item->id > last_db_item_id) {
+            last_db_item_id = new_db_item->id + 1;
+        }
     }
     mtx_unlock(&load_mtx);
-    _recalc_last_db_item_id();
     _recalc_db_item_caches();
 }
 
